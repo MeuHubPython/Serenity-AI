@@ -1,4 +1,5 @@
-import openai, persona_prompt, os, colorama
+import openai, persona_prompt, os, colorama, playsound
+from pathlib import Path
 from dotenv import load_dotenv
 from time import sleep
 
@@ -52,7 +53,7 @@ def serenity_ai():
             print(".")
 
         response = openai.chat.completions.create(
-            model= "gpt-4",
+            model= "gpt-4o",
             messages=chat_history,
             temperature=1
         )        
@@ -60,7 +61,17 @@ def serenity_ai():
         serenity_response = response.choices[0].message.content
         chat_history.append({"role": "assistant", "content": serenity_response})
 
+        speech_file_path = Path(__file__).parent / "speech.mp3"
+        voice_response = openai.audio.speech.create(
+        model="tts-1-hd",
+        voice="nova",
+        input=serenity_response
+        )
+
+        voice_response.write_to_file(speech_file_path)
         print(colorama.Fore.CYAN + f"\nSerenity >>> {serenity_response}")
+
+        playsound.playsound("/home/gustavo/Documentos/VS Code/Serenity AI/Prototype/speech.mp3")
 
         sleep(1)
         user_input = input("\nVocê >>> ")
